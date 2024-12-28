@@ -1,5 +1,4 @@
 from ultralytics import YOLO
-from imutils.video import VideoStream
 import cv2
 import numpy as np
 import time
@@ -21,7 +20,6 @@ def match_hand(hand_result,pose_result):
     for hand in hand_result:
         hand[0:2] = (hand[0:2]+hand[2:4])/2
         dist = np.sqrt(np.sum((list_wrist_poses - hand[0:2])**2, axis=1))
-        # print(dist)
         nearest_idx = np.argmin(dist)
         
         if nearest_idx//2 not in temp_hand:
@@ -31,9 +29,7 @@ def match_hand(hand_result,pose_result):
         else:
             pose_result_extended[nearest_idx//2,18,:2] = hand[0:2]
             pose_result_extended[nearest_idx//2,18,2] = hand[4]
-        # list_wrist_poses = np.delete(list_wrist_poses,nearest_idx,axis=0)
         list_wrist_poses[nearest_idx,:] = np.array([10000,10000])
-        # print(temp_hand)
     return pose_result_extended
 
 def plot_poses(frame, pose_array,show_hand_conf):
@@ -41,17 +37,15 @@ def plot_poses(frame, pose_array,show_hand_conf):
     for pose in pose_array:
         for i in range(19):
             x, y, conf = pose[i]
-            x = int(x)  # convert float to int for OpenCV
+            x = int(x)  
             y = int(y)  
             frame = cv2.circle(frame, (x, y), radius=3, color=color[j%2], thickness=-1)
-            # Define which rows you want to label with text
         if show_hand_conf:
             hand_indices = [17, 18]
             for idx in hand_indices:
                 if idx < 19:  # safety check
                     x, y, conf = pose[idx]
                     x, y = int(x), int(y)
-                    # Put text (confidence) near the circle
                     conf_text = f"{conf:.2f}"
                     frame = cv2.putText(
                         frame,
@@ -59,7 +53,7 @@ def plot_poses(frame, pose_array,show_hand_conf):
                         (x + 5, y - 5),
                         cv2.FONT_HERSHEY_SIMPLEX,
                         fontScale=1,
-                        color=(255,50,50),  # red text
+                        color=(255,50,50),
                         thickness=2,
                         lineType=cv2.LINE_AA
                     )
